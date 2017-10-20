@@ -29,7 +29,7 @@ import ssl
 ## find_urls("the internet is awesome #worldwideweb") should return [], empty list
 
 def find_urls(s):
-    urllist= re.findall('http[s]?://\S+[.]+\S+', s)
+    urllist= re.findall('http[s]?://[a-z]+[.]+[a-z]+\S+', s) #using regex to find urls in a given string
     return urllist
 
 
@@ -40,13 +40,12 @@ def find_urls(s):
 
 def grab_headlines():
     x = open('opinion.html', 'r')
-    file = x.read()
-    soup = BeautifulSoup(file, 'html.parser') #Beautiful Soup object created from the contents of the file
-    headline = soup.find_all('div', {'class': 'view view-most-read view-id-most_read view-display-id-panel_pane_1 view-dom-id-99658157999dd0ac5aa62c2b284dd266'})
+    f = x.read()
+    soup = BeautifulSoup(f, 'html.parser') #creating soup object
+    headline = soup.find_all('div', {'class': 'view view-most-read view-id-most_read view-display-id-panel_pane_1 view-dom-id-99658157999dd0ac5aa62c2b284dd266'}) #creating list of most read headlines
     for tag in headline:
-        topHL = tag.text.strip('\n').split('\n') 
-    return topHL #returns the list of headlines
-
+        mostpopular = tag.text.strip('\n').split('\n') 
+    return mostpopular
 
 ## PART 3 (a) Define a function called get_umsi_data.  It should create a dictionary
 ## saved in a variable umsi_titles whose keys are UMSI people's names, and whose 
@@ -62,8 +61,8 @@ def grab_headlines():
 def get_umsi_data():
     dataList= []
     i=0 
-    while i < 13:
-        base_url= "https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All"
+    while i < 13: #looping through all 13 pages of UMSI directory
+        base_url= "https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All" 
         page= "&page="+str(i)
         fullurl= base_url + page
         html= requests.get(fullurl, headers= {'User-Agent':'SI_CLASS'})
@@ -89,12 +88,15 @@ def get_umsi_data():
 def num_students(data):
     data= get_umsi_data()
     PhD_list= []
-    if "PhD student" in data.values():
-        PhD_list.append(data.key())
-    end =sum(PhD_list)
-    return end
+    for each in data:
+        if "PhD student" in data[each]:
+            PhD_list.append(each)
+    sum= 0 
+    for each in PhD_list:
+        sum+=1
 
-
+    return sum
+ 
 ########### TESTS; DO NOT CHANGE ANY CODE BELOW THIS LINE! ###########
 def test(got, expected, pts):
     score = 0;
