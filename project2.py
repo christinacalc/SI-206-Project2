@@ -29,7 +29,7 @@ import ssl
 ## find_urls("the internet is awesome #worldwideweb") should return [], empty list
 
 def find_urls(s):
-    urllist= re.findall('http[s]?://[a-z]+[.]+[a-z]+\S+', s) #using regex to find urls in a given string
+    urllist= re.findall('http[s]?://[a-z]+[.]+[a-z]+\S+', s) #using regex to find all urls in a given string
     return urllist
 
 
@@ -39,9 +39,8 @@ def find_urls(s):
 ## http://www.michigandaily.com/section/opinion
 
 def grab_headlines():
-    x = open('opinion.html', 'r')
-    f = x.read()
-    soup = BeautifulSoup(f, 'html.parser') #creating soup object
+    michigandaily = urllib.request.urlopen('https://www.michigandaily.com/section/opinion').read() #making request to open data from michigan daily 
+    soup = BeautifulSoup(michigandaily, 'html.parser') #creating soup object
     headline = soup.find_all('div', {'class': 'view view-most-read view-id-most_read view-display-id-panel_pane_1 view-dom-id-99658157999dd0ac5aa62c2b284dd266'}) #creating list of most read headlines
     for tag in headline:
         mostpopular = tag.text.strip('\n').split('\n') 
@@ -63,22 +62,22 @@ def get_umsi_data():
     i=0 
     while i < 13: #looping through all 13 pages of UMSI directory
         base_url= "https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All" 
-        page= "&page="+str(i)
-        fullurl= base_url + page
-        html= requests.get(fullurl, headers= {'User-Agent':'SI_CLASS'})
-        soup= BeautifulSoup(html.text, 'html.parser')
+        page= "&page="+str(i) #page will change each time the while loop runs
+        fullurl= base_url + page #concatenating baseurl with page number
+        html= requests.get(fullurl, headers= {'User-Agent':'SI_CLASS'}) #making request to the website, while loop will loop through each page and make a request
+        soup= BeautifulSoup(html.text, 'html.parser') #creating soup object
 
-        i += 1
-        tags = soup.findAll('div', {"class": "field-item even"})
+        i += 1 #signifies each time the while loop runs as well as the page number 
+        tags = soup.findAll('div', {"class": "field-item even"}) #creating a list with soup object
         for each in tags:
-            if each.string!= None: #check after to see if this works without this line
+            if each.string!= None: 
                 dataList.append(each.string)
     
-    names= dataList[::2]
-    titles= dataList[1::2]
+    names= dataList[::2] #assigning the even numbers of the list to a new list of names
+    titles= dataList[1::2] #assigning the odd numbers of the list to a new list of their titles
 
-    getting_there= zip(names, titles)
-    umsi_titles= dict(getting_there)
+    getting_there= zip(names, titles) #using zip function to create tuples in order to match name with title
+    umsi_titles= dict(getting_there) #converting this list of tuples into a dictionary 
     return umsi_titles
     #Your code here
 
@@ -86,13 +85,13 @@ def get_umsi_data():
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
-    data= get_umsi_data()
+    data= get_umsi_data() 
     PhD_list= []
     for each in data:
-        if "PhD student" in data[each]:
+        if "PhD student" in data[each]: #creating a list of the names of PhD students in the umsi_titles dictionary
             PhD_list.append(each)
     sum= 0 
-    for each in PhD_list:
+    for each in PhD_list: #counting all items in PhD_list
         sum+=1
 
     return sum
@@ -122,7 +121,7 @@ def main():
 
 
     print('\n\nTask 2: Michigan Daily')
-    total += test(grab_headlines(),["MSW students protest staff member's email based on religious bias", 'Teen arrested at Blake Transit Center', "Racist flyers calling to 'Make America White Again' found near Stockwell", "Protesters take to LSA SG panel on C.C. Little's renaming", 'Michigan football player Nate Johnson arrested for domestic violence'],50)
+    total += test(grab_headlines(),["Policing at tailgates deepens mistrust between students of color and AAPD", "'Jane the Virgin' becomes Adam the Virgo in season 4 shift", "Orion Sang: Michigan should see what it has with Peters", "Students attempt to shut down speech by controversial social scientist Charles Murray", "'Lil Pump' delivers hype despite a lack of substance"],50)
 
 
     print('Task 3: UMSI Website')
